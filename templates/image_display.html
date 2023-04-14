@@ -1,0 +1,53 @@
+  {% extends "base.html" %}
+  
+  {% block content %}
+      <style>
+          body {
+              margin: 0;
+              overflow: hidden;
+          }
+          img {
+              width: 100%;
+              height: 100%;
+              object-fit: contain;
+          }
+      </style>
+      <img id="image" src="{{ url_for('static', filename='placeholder.png') }}" style="max-width: auto; max-height: 98vh;">
+      <script>
+          function updateImage() {
+              var shown_images = {{ shown_images|list|tojson }};
+              var xhr = new XMLHttpRequest();
+              xhr.open('GET', '/get_random_image/{{ category_name }}?shown_images[]=' + shown_images.join('&shown_images[]='), true);
+              xhr.onload = function() {
+                  if (xhr.status === 200) {
+                      var data = JSON.parse(xhr.responseText);
+                      document.getElementById('image').src = data.url;
+                  }
+              };
+              xhr.send();
+          }
+  
+          updateImage();
+          setInterval(updateImage, 2500);
+  
+          document.getElementById("image").addEventListener("mouseover", function() {
+              this.style.transform = "scale(1.025)";
+              this.style.transition = "transform 0.5s ease";
+          });
+  
+          document.getElementById("image").addEventListener("mouseout", function() {
+              this.style.transform = "scale(1)";
+              this.style.transition = "transform 0.5s ease";
+          });
+  
+          document.getElementById("image").addEventListener("click", function() {
+              if (document.fullscreenEnabled) {
+                  if (!document.fullscreenElement) {
+                      this.requestFullscreen();
+                  } else {
+                      document.exitFullscreen();
+                  }
+              }
+          });
+      </script>
+  {% endblock %}
