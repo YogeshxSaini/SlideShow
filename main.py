@@ -41,6 +41,4 @@ def get_random_image(category_name):
 
 
 if __name__ == '__main__':
-  app.run(host="0.0.0.0", port=8000, debug=True)
-
-keep_alive()
+    app.run()
