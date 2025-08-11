@@ -393,6 +393,190 @@
       opacity: 1;
     }
     
+    /* Swipe Cards Styles */
+    .swipe-container {
+      position: relative;
+      width: 350px;
+      height: 500px;
+      margin: 0 auto;
+      perspective: 1000px;
+    }
+
+    .swipe-card {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      overflow: hidden;
+      cursor: grab;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transform-origin: center bottom;
+      user-select: none;
+    }
+
+    .swipe-card:active {
+      cursor: grabbing;
+    }
+
+    .swipe-card.dragging {
+      transition: none;
+    }
+
+    .swipe-card.swiped-left {
+      transform: translateX(-100vw) rotate(-30deg);
+      opacity: 0;
+    }
+
+    .swipe-card.swiped-right {
+      transform: translateX(100vw) rotate(30deg);
+      opacity: 0;
+    }
+
+    .swipe-card-image {
+      width: 100%;
+      height: 70%;
+      object-fit: cover;
+      border-radius: 20px 20px 0 0;
+    }
+
+    .swipe-card-content {
+      padding: 1rem;
+      height: 30%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .swipe-card-name {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(to right, #ff7e5f, #feb47b);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .swipe-card-info {
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .swipe-actions {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .swipe-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      transition: all 0.3s ease;
+      transform: scale(1);
+    }
+
+    .swipe-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .swipe-btn:active {
+      transform: scale(0.95);
+    }
+
+    .reject-btn {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+      color: white;
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+    }
+
+    .like-btn {
+      background: linear-gradient(135deg, #51cf66, #40c057);
+      color: white;
+      box-shadow: 0 4px 15px rgba(81, 207, 102, 0.4);
+    }
+
+    .swipe-indicators {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .swipe-card.tilted .swipe-indicators {
+      opacity: 1;
+    }
+
+    .like-indicator,
+    .nope-indicator {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 1.2rem;
+      transform: rotate(-20deg);
+    }
+
+    .like-indicator {
+      background: rgba(81, 207, 102, 0.9);
+      color: white;
+      border: 3px solid #51cf66;
+    }
+
+    .nope-indicator {
+      background: rgba(255, 107, 107, 0.9);
+      color: white;
+      border: 3px solid #ff6b6b;
+    }
+
+    .swipe-stack-indicator {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      z-index: -1;
+    }
+
+    .swipe-stack-indicator:nth-child(2) {
+      top: 5px;
+      left: 5px;
+      right: 5px;
+      bottom: 5px;
+      z-index: -2;
+    }
+
+    .swipe-empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .swipe-empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      color: rgba(255, 126, 95, 0.5);
+    }
+
     /* Loading screen styles */
     .slideshow-loader {
       position: absolute;
@@ -499,6 +683,7 @@
         
         <nav class="desktop-menu">
           <ul class="flex space-x-8">
+            <li><a href="#" class="nav-link" onclick="showSwipePage()">Swipe</a></li>
             <li><a href="#" class="nav-link" onclick="showAboutPage()">About</a></li>
             <li><a href="#" class="nav-link" onclick="showContactPage()">Contact</a></li>
           </ul>
@@ -580,6 +765,7 @@
         <nav class="desktop-menu">
           <ul class="flex space-x-8">
             <li><a href="#" class="nav-link" onclick="showMainPage()">Home</a></li>
+            <li><a href="#" class="nav-link" onclick="showSwipePage()">Swipe</a></li>
             <li><a href="#" class="nav-link active">About</a></li>
             <li><a href="#" class="nav-link" onclick="showContactPage()">Contact</a></li>
           </ul>
@@ -710,6 +896,7 @@
         <nav class="desktop-menu">
           <ul class="flex space-x-8">
             <li><a href="#" class="nav-link" onclick="showMainPage()">Home</a></li>
+            <li><a href="#" class="nav-link" onclick="showSwipePage()">Swipe</a></li>
             <li><a href="#" class="nav-link" onclick="showAboutPage()">About</a></li>
             <li><a href="#" class="nav-link active">Contact</a></li>
           </ul>
@@ -815,6 +1002,105 @@
           <div class="mb-6 md:mb-0">
             <a href="#" class="logo" onclick="showMainPage()">IGShow</a>
             <p class="text-gray-400 text-sm mt-2">Premium Model Portfolios</p>
+          </div>
+          <div class="mb-6 md:mb-0">
+            <img src="sign.png" alt="IGShow Footer Logo" class="h-20 w-auto opacity-90 hover:opacity-100 transition-opacity">
+          </div>
+        </div>
+        
+        <div class="mt-8 pt-6 border-t border-gray-800 text-center text-gray-500 text-sm">
+          <p>&copy; 2025 IGShow. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+  
+  <!-- Swipe Page -->
+  <div id="swipe-page" class="min-h-screen flex flex-col" style="display: none;">
+    <!-- Header -->
+    <header class="py-4 px-6 md:px-12 border-b border-gray-800 sticky top-0 bg-black z-10">
+      <div class="container mx-auto flex justify-between items-center">
+        <a href="#" class="logo" onclick="showMainPage()">IGShow</a>
+        
+        <nav class="desktop-menu">
+          <ul class="flex space-x-8">
+            <li><a href="#" class="nav-link" onclick="showMainPage()">Home</a></li>
+            <li><a href="#" class="nav-link active">Swipe</a></li>
+            <li><a href="#" class="nav-link" onclick="showAboutPage()">About</a></li>
+            <li><a href="#" class="nav-link" onclick="showContactPage()">Contact</a></li>
+          </ul>
+        </nav>
+        
+        <div class="mobile-menu">
+          <button class="text-white text-xl">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Swipe Content -->
+    <main class="flex-grow py-8 px-4 md:px-12 flex items-center justify-center">
+      <div class="container mx-auto max-w-md">
+        <div class="text-center mb-8">
+          <h1 class="text-3xl md:text-4xl font-bold mb-4">
+            <span class="bg-gradient-to-r from-[#ff7e5f] to-[#feb47b] bg-clip-text text-transparent">
+              Discover Models
+            </span>
+          </h1>
+          <p class="text-gray-400">Swipe right to like, left to pass. Tap on a card to view full gallery!</p>
+        </div>
+        
+        <!-- Swipe Container -->
+        <div class="swipe-container" id="swipe-container">
+          <!-- Cards will be dynamically inserted here -->
+          <div class="swipe-empty-state" id="swipe-empty-state" style="display: none;">
+            <i class="fas fa-heart"></i>
+            <h3 class="text-xl font-semibold mb-2">No more models!</h3>
+            <p class="text-gray-400 mb-4">You've seen all the amazing models in our gallery.</p>
+            <button onclick="resetSwipeCards()" class="px-6 py-2 bg-gradient-to-r from-[#ff7e5f] to-[#feb47b] rounded-full text-white font-medium hover:opacity-90 transition-all">
+              Start Over
+            </button>
+          </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="swipe-actions">
+          <button class="swipe-btn reject-btn" onclick="swipeLeft()" title="Pass">
+            <i class="fas fa-times"></i>
+          </button>
+          <button class="swipe-btn like-btn" onclick="swipeRight()" title="Like">
+            <i class="fas fa-heart"></i>
+          </button>
+        </div>
+        
+        <!-- Stats -->
+        <div class="text-center mt-8">
+          <div class="flex justify-center space-x-6 text-sm text-gray-400">
+            <div>
+              <span class="text-green-400 font-semibold" id="likes-count">0</span>
+              <span>Likes</span>
+            </div>
+            <div>
+              <span class="text-red-400 font-semibold" id="passes-count">0</span>
+              <span>Passes</span>
+            </div>
+            <div>
+              <span class="text-orange-400 font-semibold" id="remaining-count">0</span>
+              <span>Remaining</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="py-8 px-6 md:px-12 border-t border-gray-800">
+      <div class="container mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="mb-6 md:mb-0">
+            <a href="#" class="logo">IGShow</a>
+            <p class="text-gray-400 text-sm mt-2">Swipe Through Amazing Portfolios</p>
           </div>
           <div class="mb-6 md:mb-0">
             <img src="sign.png" alt="IGShow Footer Logo" class="h-20 w-auto opacity-90 hover:opacity-100 transition-opacity">
@@ -1882,6 +2168,7 @@
       document.getElementById('main-page').style.display = 'flex';
       document.getElementById('about-page').style.display = 'none';
       document.getElementById('contact-page').style.display = 'none';
+      document.getElementById('swipe-page').style.display = 'none';
       document.getElementById('model-detail-page').style.display = 'none';
     }
     
@@ -1889,6 +2176,7 @@
       document.getElementById('main-page').style.display = 'none';
       document.getElementById('about-page').style.display = 'flex';
       document.getElementById('contact-page').style.display = 'none';
+      document.getElementById('swipe-page').style.display = 'none';
       document.getElementById('model-detail-page').style.display = 'none';
     }
     
@@ -1896,6 +2184,253 @@
       document.getElementById('main-page').style.display = 'none';
       document.getElementById('about-page').style.display = 'none';
       document.getElementById('contact-page').style.display = 'flex';
+      document.getElementById('swipe-page').style.display = 'none';
+      document.getElementById('model-detail-page').style.display = 'none';
+    }
+    
+    function showSwipePage() {
+      document.getElementById('main-page').style.display = 'none';
+      document.getElementById('about-page').style.display = 'none';
+      document.getElementById('contact-page').style.display = 'none';
+      document.getElementById('swipe-page').style.display = 'flex';
+      document.getElementById('model-detail-page').style.display = 'none';
+      initializeSwipeCards();
+    }
+    
+    // Swipe Cards Functionality
+    let swipeCards = [];
+    let currentCardIndex = 0;
+    let likeCount = 0;
+    let passCount = 0;
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    let currentX = 0;
+    let currentY = 0;
+    
+    function initializeSwipeCards() {
+      swipeCards = [...models].sort(() => Math.random() - 0.5); // Shuffle the models
+      currentCardIndex = 0;
+      likeCount = 0;
+      passCount = 0;
+      updateStats();
+      createSwipeCard();
+    }
+    
+    function createSwipeCard() {
+      const container = document.getElementById('swipe-container');
+      const emptyState = document.getElementById('swipe-empty-state');
+      
+      if (currentCardIndex >= swipeCards.length) {
+        emptyState.style.display = 'block';
+        return;
+      }
+      
+      emptyState.style.display = 'none';
+      
+      // Clear existing cards
+      const existingCards = container.querySelectorAll('.swipe-card');
+      existingCards.forEach(card => card.remove());
+      
+      // Create new card
+      const model = swipeCards[currentCardIndex];
+      const card = document.createElement('div');
+      card.className = 'swipe-card';
+      card.dataset.modelIndex = currentCardIndex;
+      
+      card.innerHTML = `
+        <div class="swipe-indicators">
+          <div class="nope-indicator">PASS</div>
+          <div class="like-indicator">LIKE</div>
+        </div>
+        <div class="swipe-stack-indicator"></div>
+        <div class="swipe-stack-indicator"></div>
+        <img src="${model.thumbnail}" alt="${model.name}" class="swipe-card-image" />
+        <div class="swipe-card-content">
+          <div class="swipe-card-name">${model.name}</div>
+          <div class="swipe-card-info">Tap to view gallery • ${model.images.length || '...'} photos</div>
+        </div>
+      `;
+      
+      // Add event listeners
+      addSwipeEventListeners(card);
+      
+      // Add click listener to open slideshow
+      card.addEventListener('click', (e) => {
+        if (!isDragging) {
+          openModelDetailPage(model.id);
+        }
+      });
+      
+      container.appendChild(card);
+      
+      // Create next card preview (stack effect)
+      if (currentCardIndex + 1 < swipeCards.length) {
+        const nextCard = document.createElement('div');
+        nextCard.className = 'swipe-card';
+        nextCard.style.zIndex = '-1';
+        nextCard.style.transform = 'scale(0.95)';
+        nextCard.style.opacity = '0.5';
+        
+        const nextModel = swipeCards[currentCardIndex + 1];
+        nextCard.innerHTML = `
+          <img src="${nextModel.thumbnail}" alt="${nextModel.name}" class="swipe-card-image" />
+          <div class="swipe-card-content">
+            <div class="swipe-card-name">${nextModel.name}</div>
+            <div class="swipe-card-info">Tap to view gallery</div>
+          </div>
+        `;
+        
+        container.appendChild(nextCard);
+      }
+    }
+    
+    function addSwipeEventListeners(card) {
+      // Mouse events
+      card.addEventListener('mousedown', handleStart);
+      document.addEventListener('mousemove', handleMove);
+      document.addEventListener('mouseup', handleEnd);
+      
+      // Touch events
+      card.addEventListener('touchstart', handleStart);
+      document.addEventListener('touchmove', handleMove);
+      document.addEventListener('touchend', handleEnd);
+    }
+    
+    function handleStart(e) {
+      isDragging = true;
+      const clientX = e.clientX || e.touches[0].clientX;
+      const clientY = e.clientY || e.touches[0].clientY;
+      
+      startX = clientX;
+      startY = clientY;
+      currentX = clientX;
+      currentY = clientY;
+      
+      const card = e.currentTarget;
+      card.classList.add('dragging');
+    }
+    
+    function handleMove(e) {
+      if (!isDragging) return;
+      
+      e.preventDefault();
+      const clientX = e.clientX || e.touches[0].clientX;
+      const clientY = e.clientY || e.touches[0].clientY;
+      
+      currentX = clientX;
+      currentY = clientY;
+      
+      const deltaX = currentX - startX;
+      const deltaY = currentY - startY;
+      
+      const card = document.querySelector('.swipe-card.dragging');
+      if (!card) return;
+      
+      const rotation = deltaX * 0.1;
+      const opacity = Math.max(0.7, 1 - Math.abs(deltaX) / 300);
+      
+      card.style.transform = `translateX(${deltaX}px) translateY(${deltaY}px) rotate(${rotation}deg)`;
+      card.style.opacity = opacity;
+      
+      // Show indicators based on swipe direction
+      if (Math.abs(deltaX) > 50) {
+        card.classList.add('tilted');
+        const indicators = card.querySelector('.swipe-indicators');
+        if (deltaX > 0) {
+          indicators.querySelector('.like-indicator').style.opacity = Math.min(1, Math.abs(deltaX) / 100);
+          indicators.querySelector('.nope-indicator').style.opacity = 0;
+        } else {
+          indicators.querySelector('.nope-indicator').style.opacity = Math.min(1, Math.abs(deltaX) / 100);
+          indicators.querySelector('.like-indicator').style.opacity = 0;
+        }
+      } else {
+        card.classList.remove('tilted');
+      }
+    }
+    
+    function handleEnd(e) {
+      if (!isDragging) return;
+      
+      isDragging = false;
+      const card = document.querySelector('.swipe-card.dragging');
+      if (!card) return;
+      
+      card.classList.remove('dragging');
+      card.classList.remove('tilted');
+      
+      const deltaX = currentX - startX;
+      const threshold = 100;
+      
+      if (Math.abs(deltaX) > threshold) {
+        // Swipe detected
+        if (deltaX > 0) {
+          animateSwipeRight(card);
+        } else {
+          animateSwipeLeft(card);
+        }
+      } else {
+        // Snap back
+        card.style.transform = '';
+        card.style.opacity = '';
+      }
+    }
+    
+    function swipeLeft() {
+      const card = document.querySelector('.swipe-card:not(.swiped-left):not(.swiped-right)');
+      if (card) {
+        animateSwipeLeft(card);
+      }
+    }
+    
+    function swipeRight() {
+      const card = document.querySelector('.swipe-card:not(.swiped-left):not(.swiped-right)');
+      if (card) {
+        animateSwipeRight(card);
+      }
+    }
+    
+    function animateSwipeLeft(card) {
+      card.classList.add('swiped-left');
+      passCount++;
+      setTimeout(() => {
+        currentCardIndex++;
+        createSwipeCard();
+        updateStats();
+      }, 300);
+    }
+    
+    function animateSwipeRight(card) {
+      card.classList.add('swiped-right');
+      likeCount++;
+      setTimeout(() => {
+        currentCardIndex++;
+        createSwipeCard();
+        updateStats();
+      }, 300);
+    }
+    
+    function updateStats() {
+      document.getElementById('likes-count').textContent = likeCount;
+      document.getElementById('passes-count').textContent = passCount;
+      document.getElementById('remaining-count').textContent = Math.max(0, swipeCards.length - currentCardIndex);
+    }
+    
+    function resetSwipeCards() {
+      currentCardIndex = 0;
+      likeCount = 0;
+      passCount = 0;
+      swipeCards = [...models].sort(() => Math.random() - 0.5); // Shuffle again
+      updateStats();
+      createSwipeCard();
+    }
+    
+    // Update existing showMainPage function to include swipe page
+    function showMainPage() {
+      document.getElementById('main-page').style.display = 'flex';
+      document.getElementById('about-page').style.display = 'none';
+      document.getElementById('contact-page').style.display = 'none';
+      document.getElementById('swipe-page').style.display = 'none';
       document.getElementById('model-detail-page').style.display = 'none';
     }
     
