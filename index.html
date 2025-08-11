@@ -1,0 +1,1905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IGShow - Model Portfolio Gallery</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      background-color: #000000;
+      font-family: 'Poppins', sans-serif;
+      color: #ffffff;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+
+    
+    /* Mouse-responsive gradient overlay */
+    .mouse-gradient-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+                  rgba(255, 126, 95, 0.03) 0%, 
+                  rgba(254, 180, 123, 0.02) 40%, 
+                  transparent 70%);
+      z-index: -1;
+      pointer-events: none;
+      transition: background 0.3s ease;
+    }
+    
+    @keyframes float {
+      0%, 100% {
+        transform: translate(0px, 0px) rotate(0deg);
+      }
+      33% {
+        transform: translate(100px, -50px) rotate(120deg);
+      }
+      66% {
+        transform: translate(-50px, 100px) rotate(240deg);
+      }
+    }
+    
+    /* Image optimization and loading effects */
+    .image-container {
+      position: relative;
+      overflow: hidden;
+      background: #1a1a1a;
+    }
+    
+    .image-placeholder {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+      background-size: 40px 40px;
+      animation: shimmer 1.5s infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      font-size: 14px;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: -40px 0; }
+      100% { background-position: 40px 0; }
+    }
+    
+    .lazy-image {
+      transition: all 0.6s ease;
+      filter: blur(20px);
+      opacity: 0;
+      transform: scale(1.1);
+    }
+    
+    .lazy-image.loaded {
+      filter: blur(0);
+      opacity: 1;
+      transform: scale(1);
+    }
+    
+    .lazy-image.error {
+      opacity: 0.5;
+      filter: grayscale(1);
+    }
+    
+    /* Loading spinner for images */
+    .image-loader {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 30px;
+      height: 30px;
+      border: 2px solid rgba(255, 126, 95, 0.3);
+      border-top: 2px solid rgba(255, 126, 95, 1);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      z-index: 10;
+    }
+    
+    @keyframes spin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    
+    /* Enhanced card animations */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      width: 420px;
+      height: 420px;
+      position: relative;
+      overflow: hidden;
+      transform-style: preserve-3d;
+    }
+    
+    .glass-card-flexible {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      width: auto;
+      height: auto;
+    }
+    
+    .glass-card-flexible:hover,
+    .glass-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .logo {
+      font-weight: 700;
+      font-size: 1.8rem;
+      background: linear-gradient(to right, #ff7e5f, #feb47b);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .nav-link {
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(to right, #ff7e5f, #feb47b);
+      transition: width 0.3s ease;
+    }
+    
+    .nav-link:hover::after {
+      width: 100%;
+    }
+    
+    .nav-link.active {
+      color: #ff7e5f;
+    }
+    
+    .nav-link.active::after {
+      width: 100%;
+    }
+    
+    .social-icon {
+      transition: all 0.3s ease;
+    }
+    
+    .social-icon:hover {
+      transform: translateY(-3px);
+      color: #ff7e5f;
+    }
+    
+    .model-name {
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+    
+    .model-category {
+      font-size: 0.8rem;
+      opacity: 0.7;
+    }
+    
+    .mobile-menu {
+      display: none;
+    }
+    
+    @media (max-width: 768px) {
+      .desktop-menu {
+        display: none;
+      }
+      
+      .mobile-menu {
+        display: block;
+      }
+    }
+    
+    /* Model detail page styles */
+    .model-detail-page {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      z-index: 100;
+      overflow: hidden;
+    }
+    
+    .slideshow-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 1s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .slide.active {
+      opacity: 1;
+    }
+    
+    .slide img {
+      max-width: 100vw;
+      max-height: 95vh;
+      width: auto;
+      height: 90vh;
+      object-fit: contain;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    
+    .slide img:hover {
+      transform: scale(1.02);
+    }
+    
+    /* Full screen slideshow styles */
+    .slideshow-fullscreen {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 1000 !important;
+      background: rgba(0, 0, 0, 0.98) !important;
+    }
+    
+    .slideshow-fullscreen .slide img {
+      max-width: 100vw;
+      max-height: 100vh;
+      width: auto;
+      height: 100vh;
+      border-radius: 0px;
+      object-fit: contain;
+    }
+    
+    .slideshow-fullscreen .model-detail-header,
+    .slideshow-fullscreen .model-detail-controls,
+    .slideshow-fullscreen .model-info,
+    .slideshow-fullscreen .fullscreen-exit-btn {
+      z-index: 1001;
+    }
+    
+    .fullscreen-exit-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 1002;
+      font-size: 20px;
+      color: white;
+    }
+    
+    .fullscreen-exit-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+    
+    .model-detail-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+      z-index: 10;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+    }
+    
+    .model-info {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      padding: 1rem;
+      background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+      z-index: 10;
+    }
+    
+    .model-detail-controls {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .control-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .control-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(to right, #ff7e5f, #feb47b);
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+    
+    .slideshow-signature {
+      position: absolute;
+      bottom: 20px;
+      right: -40px;
+      z-index: 10;
+      opacity: 0.8;
+      transition: opacity 0.3s ease;
+    }
+    
+    .slideshow-signature img {
+      height: 80px;
+      width: auto;
+    }
+    
+    .slideshow-signature:hover {
+      opacity: 1;
+    }
+    
+    /* Loading screen styles */
+    .slideshow-loader {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      opacity: 1;
+      transition: opacity 0.5s ease;
+    }
+    
+    .slideshow-loader.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .loader {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      background: transparent;
+      border-radius: 50%;
+      box-shadow: 25px 25px 75px rgba(0,0,0,0.55);
+      border: 1px solid #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .loader::before {
+      content: '';
+      position: absolute;
+      inset: 20px;
+      background: transparent;
+      border: 1px dashed #444;
+      border-radius: 50%;
+      box-shadow: inset -5px -5px 25px rgba(0,0,0,0.25),
+      inset 5px 5px 35px rgba(0,0,0,0.25);
+    }
+
+    .loader::after {
+      content: '';
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 1px dashed #444;
+      box-shadow: inset -5px -5px 25px rgba(0,0,0,0.25),
+      inset 5px 5px 35px rgba(0,0,0,0.25);
+    }
+
+    .loader span {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 50%;
+      height: 100%;
+      background: transparent;
+      transform-origin: top left;
+      animation: radar81 2s linear infinite;
+      border-top: 1px dashed #fff;
+    }
+
+    .loader span::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: seagreen;
+      transform-origin: top left;
+      transform: rotate(-55deg);
+      filter: blur(30px) drop-shadow(20px 20px 20px seagreen);
+    }
+
+    @keyframes radar81 {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Mouse-responsive gradient overlay -->
+  <div class="mouse-gradient-overlay"></div>
+  
+  <!-- Main Page -->
+  <div id="main-page" class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="py-4 px-6 md:px-12 border-b border-gray-800 sticky top-0 bg-black z-10">
+      <div class="container mx-auto flex justify-between items-center">
+        <a href="#" class="logo">IGShow</a>
+        
+        <nav class="desktop-menu">
+          <ul class="flex space-x-8">
+            <li><a href="#" class="nav-link" onclick="showAboutPage()">About</a></li>
+            <li><a href="#" class="nav-link" onclick="showContactPage()">Contact</a></li>
+          </ul>
+        </nav>
+        
+        <div class="mobile-menu">
+          <button class="text-white text-xl">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="flex-grow py-8 px-4 md:px-12">
+      <div class="container mx-auto">
+        <!-- Search Bar -->
+        <div class="mb-8 flex justify-center">
+          <div class="relative w-full max-w-md">
+            <input 
+              type="text" 
+              id="search-input" 
+              placeholder="Search models..." 
+              class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-full text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all"
+            >
+            <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+              <i class="fas fa-search"></i>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Model Grid -->
+        <div class="flex flex-wrap justify-center gap-6" id="model-grid">
+          <!-- Model cards will be dynamically inserted here -->
+        </div>
+        
+        <!-- Infinite Scroll Loading Indicator -->
+        <div id="loading-indicator" class="mt-12 text-center" style="display: none;">
+          <div class="inline-flex items-center space-x-2">
+            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
+            <span class="text-gray-400">Loading more models...</span>
+          </div>
+        </div>
+        
+        <!-- End of content indicator -->
+        <div id="end-of-content" class="mt-12 text-center text-gray-500" style="display: none;">
+          <p>You've seen all our amazing models! ✨</p>
+        </div>
+      </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="py-8 px-6 md:px-12 border-t border-gray-800">
+      <div class="container mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="mb-6 md:mb-0">
+            <a href="#" class="logo">IGShow</a>
+            <p class="text-gray-400 text-sm mt-2">Premium Model Portfolios</p>
+          </div>
+          <div class="mb-6 md:mb-0">
+            <img src="sign.png" alt="IGShow Footer Logo" class="h-20 w-auto opacity-90 hover:opacity-100 transition-opacity">
+          </div>
+        </div>
+        
+        <div class="mt-8 pt-6 border-t border-gray-800 text-center text-gray-500 text-sm">
+          <p>&copy; 2025 IGShow. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+  
+  <!-- About Page -->
+  <div id="about-page" class="min-h-screen flex flex-col" style="display: none;">
+    <!-- Header -->
+    <header class="py-4 px-6 md:px-12 border-b border-gray-800 sticky top-0 bg-black z-10">
+      <div class="container mx-auto flex justify-between items-center">
+        <a href="#" class="logo" onclick="showMainPage()">IGShow</a>
+        
+        <nav class="desktop-menu">
+          <ul class="flex space-x-8">
+            <li><a href="#" class="nav-link" onclick="showMainPage()">Home</a></li>
+            <li><a href="#" class="nav-link active">About</a></li>
+            <li><a href="#" class="nav-link" onclick="showContactPage()">Contact</a></li>
+          </ul>
+        </nav>
+        
+        <div class="mobile-menu">
+          <button class="text-white text-xl">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+    
+    <!-- About Content -->
+    <main class="flex-grow py-12 px-4 md:px-12">
+      <div class="container mx-auto max-w-4xl">
+        <div class="text-center mb-12">
+          <h1 class="text-4xl md:text-6xl font-bold mb-6">
+            <span class="logo">About IGShow</span>
+          </h1>
+          <p class="text-xl text-gray-300 leading-relaxed">
+            Discover the artistry behind every frame
+          </p>
+        </div>
+        
+        <div class="grid md:grid-cols-2 gap-12 items-center mb-16">
+          <div class="glass-card-flexible p-8 rounded-lg">
+            <h2 class="text-2xl font-semibold mb-6 text-orange-400">Our Vision</h2>
+            <p class="text-gray-300 leading-relaxed mb-4">
+              IGShow is more than just a portfolio gallery - it's a celebration of creative expression and visual storytelling. We believe every model has a unique story to tell through their craft.
+            </p>
+            <p class="text-gray-300 leading-relaxed">
+              Our platform showcases the diverse talents of models from around the world, creating a space where artistry meets technology in perfect harmony.
+            </p>
+          </div>
+          
+          <div class="glass-card-flexible p-8 rounded-lg">
+            <h2 class="text-2xl font-semibold mb-6 text-orange-400">What We Do</h2>
+            <ul class="text-gray-300 space-y-3">
+              <li class="flex items-center">
+                <i class="fas fa-camera text-orange-400 mr-3"></i>
+                Curated portfolio galleries
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-play text-orange-400 mr-3"></i>
+                Interactive slideshow experiences
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-instagram text-orange-400 mr-3"></i>
+                Direct social media integration
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-search text-orange-400 mr-3"></i>
+                Advanced search capabilities
+              </li>
+            </ul>
+            <p class="text-gray-300 leading-relaxed mt-4">
+              Every feature is designed with both models and viewers in mind, providing seamless user experiences across all devices.
+            </p>
+          </div>
+        </div>
+        
+        <div class="glass-card-flexible p-8 rounded-lg mb-12">
+          <h2 class="text-3xl font-semibold mb-6 text-center">Our Features</h2>
+          <div class="grid md:grid-cols-3 gap-8">
+            <div class="text-center">
+              <div class="w-16 h-16 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-images text-white text-xl"></i>
+              </div>
+              <h3 class="text-xl font-semibold mb-2">High-Quality Galleries</h3>
+              <p class="text-gray-400">Professional portfolio presentations with stunning visual quality</p>
+            </div>
+            
+            <div class="text-center">
+              <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-expand text-white text-xl"></i>
+              </div>
+              <h3 class="text-xl font-semibold mb-2">Fullscreen Experience</h3>
+              <p class="text-gray-400">Immersive viewing with native fullscreen support</p>
+            </div>
+            
+            <div class="text-center">
+              <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-mobile-alt text-white text-xl"></i>
+              </div>
+              <h3 class="text-xl font-semibold mb-2">Mobile Optimized</h3>
+              <p class="text-gray-400">Seamless experience across all devices and screen sizes</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="text-center">
+          <h2 class="text-2xl font-semibold mb-6">Ready to explore?</h2>
+          <button onclick="showMainPage()" class="px-8 py-3 bg-gradient-to-r from-[#ff7e5f] to-[#feb47b] rounded-full text-white font-medium hover:opacity-90 transition-all">
+            Browse Models
+          </button>
+        </div>
+      </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="py-8 px-6 md:px-12 border-t border-gray-800">
+      <div class="container mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="mb-6 md:mb-0">
+            <a href="#" class="logo" onclick="showMainPage()">IGShow</a>
+            <p class="text-gray-400 text-sm mt-2">Premium Model Portfolios</p>
+          </div>
+          <div class="mb-6 md:mb-0">
+            <img src="sign.png" alt="IGShow Footer Logo" class="h-20 w-auto opacity-90 hover:opacity-100 transition-opacity">
+          </div>
+        </div>
+        
+        <div class="mt-8 pt-6 border-t border-gray-800 text-center text-gray-500 text-sm">
+          <p>&copy; 2025 IGShow. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+  
+  <!-- Contact Page -->
+  <div id="contact-page" class="min-h-screen flex flex-col" style="display: none;">
+    <!-- Header -->
+    <header class="py-4 px-6 md:px-12 border-b border-gray-800 sticky top-0 bg-black z-10">
+      <div class="container mx-auto flex justify-between items-center">
+        <a href="#" class="logo" onclick="showMainPage()">IGShow</a>
+        
+        <nav class="desktop-menu">
+          <ul class="flex space-x-8">
+            <li><a href="#" class="nav-link" onclick="showMainPage()">Home</a></li>
+            <li><a href="#" class="nav-link" onclick="showAboutPage()">About</a></li>
+            <li><a href="#" class="nav-link active">Contact</a></li>
+          </ul>
+        </nav>
+        
+        <div class="mobile-menu">
+          <button class="text-white text-xl">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Contact Content -->
+    <main class="flex-grow py-12 px-4 md:px-12">
+      <div class="container mx-auto max-w-4xl">
+        <div class="text-center mb-12">
+          <h1 class="text-4xl md:text-6xl font-bold mb-6">
+            <span class="logo">Get in Touch</span>
+          </h1>
+          <p class="text-xl text-gray-300 leading-relaxed">
+            We'd love to hear from you
+          </p>
+        </div>
+        
+        <div class="grid md:grid-cols-2 gap-12">
+          <!-- Contact Form -->
+          <div class="glass-card-flexible p-8 rounded-lg">
+            <h2 class="text-2xl font-semibold mb-6 text-orange-400">Send us a message</h2>
+            <form class="space-y-6">
+              <div>
+                <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Name</label>
+                <input type="text" id="name" name="name" class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all" placeholder="Your full name">
+              </div>
+              
+              <div>
+                <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                <input type="email" id="email" name="email" class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all" placeholder="your@email.com">
+              </div>
+              
+              <div>
+                <label for="subject" class="block text-sm font-medium text-gray-300 mb-2">Subject</label>
+                <input type="text" id="subject" name="subject" class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all" placeholder="What's this about?">
+              </div>
+              
+              <div>
+                <label for="message" class="block text-sm font-medium text-gray-300 mb-2">Message</label>
+                <textarea id="message" name="message" rows="5" class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all resize-none" placeholder="Tell us more..."></textarea>
+              </div>
+              
+              <button type="submit" class="w-full px-6 py-3 bg-gradient-to-r from-[#ff7e5f] to-[#feb47b] rounded-lg text-white font-medium hover:opacity-90 transition-all">
+                Send Message
+              </button>
+            </form>
+          </div>
+          
+          <!-- Contact Info -->
+          <div class="space-y-8">
+            <div class="glass-card-flexible p-6 rounded-lg">
+              <h3 class="text-xl font-semibold mb-4 text-orange-400">Contact Information</h3>
+              <div class="space-y-4">
+                <div class="flex items-center">
+                  <i class="fas fa-envelope text-orange-400 mr-4 w-5"></i>
+                  <span class="text-gray-300">hello@igshow.com</span>
+                </div>
+                <div class="flex items-center">
+                  <i class="fas fa-phone text-orange-400 mr-4 w-5"></i>
+                  <span class="text-gray-300">+1 (555) 123-4567</span>
+                </div>
+                <div class="flex items-center">
+                  <i class="fas fa-map-marker-alt text-orange-400 mr-4 w-5"></i>
+                  <span class="text-gray-300">New York, NY 10001</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="glass-card-flexible p-6 rounded-lg">
+              <h3 class="text-xl font-semibold mb-4 text-orange-400">Business Hours</h3>
+              <div class="space-y-2 text-gray-300">
+                <div class="flex justify-between">
+                  <span>Monday - Friday</span>
+                  <span>9:00 AM - 6:00 PM</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>Saturday</span>
+                  <span>10:00 AM - 4:00 PM</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>Sunday</span>
+                  <span>Closed</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="py-8 px-6 md:px-12 border-t border-gray-800">
+      <div class="container mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="mb-6 md:mb-0">
+            <a href="#" class="logo" onclick="showMainPage()">IGShow</a>
+            <p class="text-gray-400 text-sm mt-2">Premium Model Portfolios</p>
+          </div>
+          <div class="mb-6 md:mb-0">
+            <img src="sign.png" alt="IGShow Footer Logo" class="h-20 w-auto opacity-90 hover:opacity-100 transition-opacity">
+          </div>
+        </div>
+        
+        <div class="mt-8 pt-6 border-t border-gray-800 text-center text-gray-500 text-sm">
+          <p>&copy; 2025 IGShow. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+  
+  <!-- Model Detail Page -->
+  <div id="model-detail-page" class="model-detail-page">
+    <div class="model-detail-header">
+      <div id="back-button" class="control-btn">
+        <i class="fas fa-arrow-left"></i>
+      </div>
+    </div>
+    
+    <div class="model-info">
+      <h2 id="detail-model-name" class="text-xl font-semibold text-white"></h2>
+    </div>
+    
+    <div class="slideshow-wrapper" id="slideshow-wrapper">
+      <!-- Slides will be dynamically inserted here -->
+    </div>
+    
+    <!-- Loading screen -->
+    <div class="slideshow-loader" id="slideshow-loader">
+      <div class="loader">
+        <span></span>
+      </div>
+    </div>
+    
+    <div class="slideshow-signature">
+      <img src="sign-removebg.png" alt="IGShow Signature">
+    </div>
+    
+    <div class="model-detail-controls">
+      <div class="control-btn" id="prev-slide-btn">
+        <i class="fas fa-chevron-left"></i>
+      </div>
+      <div class="control-btn" id="play-pause-btn">
+        <i class="fas fa-pause"></i>
+      </div>
+      <div class="control-btn" id="fullscreen-btn">
+        <i class="fas fa-expand"></i>
+      </div>
+      <div class="control-btn" id="next-slide-btn">
+        <i class="fas fa-chevron-right"></i>
+      </div>
+    </div>
+    
+    <div class="progress-bar" id="progress-bar"></div>
+  </div>
+
+  <script>
+    // Model data structure - images will be loaded from txt files
+    const models = [
+      {
+        id: 1,
+        name: "Aayushi",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/aayushi.jpg",
+        txtFile: "aayushi.txt",
+        instagram: "https://www.instagram.com/aayyuc/",
+        images: []
+      },
+      {
+        id: 2,
+        name: "Aayushi Verma",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/aayushiverma.jpg",
+        txtFile: "aayushiverma.txt",
+        instagram: "https://www.instagram.com/aayushiivermaa/",
+        images: []
+      },
+      {
+        id: 3,
+        name: "Aditi Bhatia",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/aditibhatia.jpg",
+        txtFile: "aditibhatia.txt",
+        instagram: "https://www.instagram.com/aditi_bhatia4/",
+        images: []
+      },
+      {
+        id: 4,
+        name: "Amrita Singh",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/amritasingh.jpg",
+        txtFile: "amritasingh.txt",
+        instagram: "https://www.instagram.com/amritasiingh/",
+        images: []
+      },
+      {
+        id: 5,
+        name: "Amy Aela",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/amyaela.jpg",
+        txtFile: "amyaela.txt",
+        instagram: "https://www.instagram.com/amyaela/",
+        images: []
+      },
+      {
+        id: 6,
+        name: "Asfa Sinha",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/asfasinha.jpg",
+        txtFile: "asfasinha.txt",
+        instagram: "https://www.instagram.com/asfasinha/",
+        images: []
+      },
+      {
+        id: 7,
+        name: "Aveera Singh Masson",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/aveerasinghmasson.jpg",
+        txtFile: "aveerasinghmasson.txt",
+        instagram: "https://www.instagram.com/aveerasinghmasson/",
+        images: []
+      },
+      {
+        id: 8,
+        name: "D",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/d.jpg",
+        txtFile: "d.txt",
+        instagram: "https://www.instagram.com/r.kive.d/",
+        images: []
+      },
+      {
+        id: 9,
+        name: "Diksha Singh",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/dikshasingh.jpg",
+        txtFile: "dikshasingh.txt",
+        instagram: "https://www.instagram.com/dikshajsingh/",
+        images: []
+      },
+      {
+        id: 10,
+        name: "Eva Giri",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/evagiri.jpg",
+        txtFile: "evagiri.txt",
+        instagram: "https://www.instagram.com/evaaa.g__/",
+        images: []
+      },
+      {
+        id: 11,
+        name: "Harshala Patil",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/harshalaapatil.jpg",
+        txtFile: "harshalapatil.txt",
+        instagram: "https://www.instagram.com/harshalaapatil/",
+        images: []
+      },
+      {
+        id: 12,
+        name: "Ilisha",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/ilisha.jpg",
+        txtFile: "ilisha.txt",
+        instagram: "https://www.instagram.com/ilishask/",
+        images: []
+      },
+      {
+        id: 13,
+        name: "Isha Jain",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/ishajain.jpg",
+        txtFile: "ishajain.txt",
+        instagram: "https://www.instagram.com/ishaxjain/",
+        images: []
+      },
+      {
+        id: 14,
+        name: "Kashish Mehta",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/kashishmehta.jpg",
+        txtFile: "kashishmehta.txt",
+        instagram: "https://www.instagram.com/kashishmehta_/",
+        images: []
+      },
+      {
+        id: 15,
+        name: "Malika Tomar",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/malikatomar.jpg",
+        txtFile: "malikatomar.txt",
+        instagram: "https://www.instagram.com/mallikastomar/",
+        images: []
+      },
+      {
+        id: 16,
+        name: "Manavi Verma",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/manavi.jpg",
+        txtFile: "manaviverma.txt",
+        instagram: "https://www.instagram.com/manavivermaa/",
+        images: []
+      },
+      {
+        id: 17,
+        name: "Manya Arora",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/manyaarora.jpg",
+        txtFile: "manyaarora.txt",
+        instagram: "https://www.instagram.com/manya.aroraaa/",
+        images: []
+      },
+      {
+        id: 18,
+        name: "Payal Tosyan",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/payaltosyan.jpg",
+        txtFile: "payaltosyan.txt",
+        instagram: "https://www.instagram.com/payaltosyan/",
+        images: []
+      },
+      {
+        id: 19,
+        name: "Pooja",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/pooja.jpg",
+        txtFile: "pooja.txt",
+        instagram: "https://www.instagram.com/pooja.jainn_/",
+        images: []
+      },
+      {
+        id: 20,
+        name: "Preksha Makhija",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/prekshamakhija.jpg",
+        txtFile: "prekshamakhija.txt",
+        instagram: "https://www.instagram.com/prekshamakhijaa/",
+        images: []
+      },
+      {
+        id: 21,
+        name: "Raveen Kapatia",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/raveenkapatia.jpg",
+        txtFile: "raveenkapatia.txt",
+        instagram: "https://www.instagram.com/raveena0706/",
+        images: []
+      },
+      {
+        id: 22,
+        name: "Shambhavi",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/shambhavi.jpg",
+        txtFile: "shambhavi.txt",
+        instagram: "https://www.instagram.com/shambhavi1997/",
+        images: []
+      },
+      {
+        id: 23,
+        name: "Sina",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/sina.jpg",
+        txtFile: "sina.txt",
+        instagram: "https://www.instagram.com/okaysina/",
+        images: []
+      },
+      {
+        id: 24,
+        name: "Sonia Singh Khatri",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/soniasinghkhatri.jpg",
+        txtFile: "soniasinghkhatri.txt",
+        instagram: "https://www.instagram.com/fitgirl_08/",
+        images: []
+      },
+      {
+        id: 25,
+        name: "Yashita",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/yashita.jpg",
+        txtFile: "yashita.txt",
+        instagram: "https://www.instagram.com/yashitac/",
+        images: []
+      },
+      {
+        id: 26,
+        name: "Yukti Thareja",
+        thumbnail: "https://extwpiof5sjdxkro.public.blob.vercel-storage.com/static/yuktithareja.jpg",
+        txtFile: "yuktithareja.txt",
+        instagram: "https://www.instagram.com/realyukti/",
+        images: []
+      }
+    ];
+
+    // Function to fetch images from txt file
+    async function fetchModelImages(txtFile) {
+      try {
+        const response = await fetch(`./models/${txtFile}`);
+        const text = await response.text();
+        return text.split('\n').filter(url => url.trim() !== '');
+      } catch (error) {
+        console.error(`Error fetching images from ${txtFile}:`, error);
+        return [];
+      }
+    }
+
+    // Initialize models with images from txt files
+    async function initializeModels() {
+      for (const model of models) {
+        model.images = await fetchModelImages(model.txtFile);
+        // Keep the predefined thumbnails from Vercel blob storage
+      }
+    }
+
+    // DOM elements
+    const mainPage = document.getElementById('main-page');
+    const modelGrid = document.getElementById('model-grid');
+    const modelDetailPage = document.getElementById('model-detail-page');
+    const slideshowWrapper = document.getElementById('slideshow-wrapper');
+    const slideshowLoader = document.getElementById('slideshow-loader');
+    const detailModelName = document.getElementById('detail-model-name');
+    const backButton = document.getElementById('back-button');
+    const prevSlideBtn = document.getElementById('prev-slide-btn');
+    const nextSlideBtn = document.getElementById('next-slide-btn');
+    const playPauseBtn = document.getElementById('play-pause-btn');
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    const progressBar = document.getElementById('progress-bar');
+
+    // Variables for slideshow
+    let currentModelId = null;
+    let currentSlideIndex = 0;
+    let slideshowImages = [];
+    let slideshowInterval = null;
+    let isPlaying = true;
+    let slideDuration = 5000; // 5 seconds
+    let progressInterval = null;
+    let progressValue = 0;
+
+    // Pagination variables
+    let modelsPerPage = 12; // Show 12 models initially
+    let currentPage = 1;
+    let filteredModels = [...models]; // Copy of models for filtering
+    let currentSearchTerm = '';
+    let isFullscreen = false;
+    let isLoading = false; // For infinite scroll
+
+    // Mouse tracking variables
+    let mouseX = 0;
+    let mouseY = 0;
+
+    // Image optimization utilities
+    class ImageOptimizer {
+      constructor() {
+        this.observer = null;
+        this.initLazyLoading();
+      }
+      
+      initLazyLoading() {
+        // Intersection Observer for lazy loading
+        this.observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              this.loadImage(entry.target);
+              this.observer.unobserve(entry.target);
+            }
+          });
+        }, {
+          rootMargin: '50px' // Start loading 50px before image enters viewport
+        });
+      }
+      
+      optimizeImageUrl(url, width = 420, quality = 80) {
+        // Add optimization parameters for supported services
+        if (url.includes('vercel-storage.com')) {
+          return `${url}?w=${width}&q=${quality}&f=webp`;
+        }
+        
+        // For other URLs, return as is (you can add more optimizations here)
+        return url;
+      }
+      
+      loadImage(img) {
+        const container = img.closest('.image-container');
+        const loader = container?.querySelector('.image-loader');
+        const placeholder = container?.querySelector('.image-placeholder');
+        
+        // Show loader
+        if (loader) loader.style.display = 'block';
+        
+        // Create a new image to preload
+        const imageLoader = new Image();
+        
+        imageLoader.onload = () => {
+          // Image loaded successfully
+          img.src = imageLoader.src;
+          img.classList.add('loaded');
+          
+          // Hide loader and placeholder
+          if (loader) loader.style.display = 'none';
+          if (placeholder) placeholder.style.display = 'none';
+          
+          // Add entrance animation
+          setTimeout(() => {
+            img.style.transform = 'scale(1)';
+          }, 100);
+        };
+        
+        imageLoader.onerror = () => {
+          // Image failed to load
+          img.classList.add('error');
+          if (loader) loader.style.display = 'none';
+          if (placeholder) {
+            placeholder.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Failed to load';
+            placeholder.style.color = '#ff6b6b';
+          }
+        };
+        
+        // Start loading the image
+        imageLoader.src = img.dataset.src;
+      }
+      
+      createOptimizedImage(src, alt, className = '') {
+        const container = document.createElement('div');
+        container.className = 'image-container absolute inset-0';
+        
+        // Create placeholder
+        const placeholder = document.createElement('div');
+        placeholder.className = 'image-placeholder';
+        placeholder.innerHTML = '<i class="fas fa-image"></i> Loading...';
+        
+        // Create loader
+        const loader = document.createElement('div');
+        loader.className = 'image-loader';
+        loader.style.display = 'none';
+        
+        // Create image
+        const img = document.createElement('img');
+        img.className = `lazy-image absolute inset-0 w-full h-full object-cover ${className}`;
+        img.alt = alt;
+        img.dataset.src = this.optimizeImageUrl(src);
+        
+        // Assemble container
+        container.appendChild(placeholder);
+        container.appendChild(loader);
+        container.appendChild(img);
+        
+        // Start observing for lazy loading
+        this.observer.observe(img);
+        
+        return container;
+      }
+    }
+    
+    // Initialize image optimizer
+    const imageOptimizer = new ImageOptimizer();
+    // Initialize mouse effects and other features
+    function initializeEffects() {
+      // Mouse movement tracking for gradient overlay
+      document.addEventListener('mousemove', (e) => {
+        mouseX = (e.clientX / window.innerWidth) * 100;
+        mouseY = (e.clientY / window.innerHeight) * 100;
+        
+        const overlay = document.querySelector('.mouse-gradient-overlay');
+        if (overlay) {
+          overlay.style.setProperty('--mouse-x', mouseX + '%');
+          overlay.style.setProperty('--mouse-y', mouseY + '%');
+        }
+      });
+
+      // Initialize infinite scroll
+      initializeInfiniteScroll();
+    }
+
+    // Infinite scroll functionality
+    function initializeInfiniteScroll() {
+      const loadingIndicator = document.getElementById('loading-indicator');
+      const endOfContent = document.getElementById('end-of-content');
+      
+      // Intersection Observer for infinite scroll
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !isLoading) {
+            const totalPages = Math.ceil(filteredModels.length / modelsPerPage);
+            
+            if (currentPage < totalPages) {
+              loadMoreModels();
+            } else {
+              // Show end of content message
+              loadingIndicator.style.display = 'none';
+              endOfContent.style.display = 'block';
+              observer.unobserve(entry.target);
+            }
+          }
+        });
+      }, {
+        rootMargin: '100px' // Start loading 100px before reaching the bottom
+      });
+      
+      // Create a sentinel element to observe
+      const sentinel = document.createElement('div');
+      sentinel.id = 'scroll-sentinel';
+      sentinel.style.height = '1px';
+      
+      const mainContent = document.querySelector('#main-page main .container');
+      if (mainContent) {
+        mainContent.appendChild(sentinel);
+        observer.observe(sentinel);
+      }
+    }
+    
+    // Load more models for infinite scroll
+    function loadMoreModels() {
+      if (isLoading) return;
+      
+      isLoading = true;
+      const loadingIndicator = document.getElementById('loading-indicator');
+      loadingIndicator.style.display = 'block';
+      
+      // Simulate loading delay for better UX
+      setTimeout(() => {
+        currentPage++;
+        renderModelCards();
+        isLoading = false;
+        loadingIndicator.style.display = 'none';
+      }, 800); // 800ms delay
+    }
+
+    // Render model cards with infinite scroll support
+    function renderModelCards() {
+      const startIndex = 0;
+      const endIndex = currentPage * modelsPerPage;
+      const modelsToShow = filteredModels.slice(startIndex, endIndex);
+      
+      // Clear grid only if it's the first page or we're searching
+      if (currentPage === 1) {
+        modelGrid.innerHTML = '';
+      }
+      
+      // Only render new models (not already rendered)
+      const startRenderIndex = (currentPage - 1) * modelsPerPage;
+      const newModels = modelsToShow.slice(startRenderIndex);
+      
+      newModels.forEach((model, index) => {
+        const card = document.createElement('div');
+        card.className = 'glass-card rounded-lg overflow-hidden cursor-pointer transform transition-all duration-300';
+        card.style.animationDelay = `${index * 0.1}s`; // Stagger animation
+        
+        // Create optimized image container
+        const imageContainer = imageOptimizer.createOptimizedImage(
+          model.thumbnail, 
+          model.name,
+          ''
+        );
+        
+        card.innerHTML = `
+          <div class="relative w-full h-full">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3 z-10">
+              <div class="flex justify-between items-end">
+                <h3 class="model-name text-white text-base">${model.name}</h3>
+                <a href="${model.instagram}" target="_blank" rel="noopener noreferrer" 
+                   class="instagram-btn bg-black/50 hover:bg-black/70 text-white w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 ml-2 backdrop-blur-sm border border-white/20 hover:border-white/40"
+                   onclick="event.stopPropagation();">
+                  <i class="fab fa-instagram text-sm"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // Insert the optimized image container
+        const cardContent = card.querySelector('.relative');
+        cardContent.insertBefore(imageContainer, cardContent.firstChild);
+        
+        card.addEventListener('click', () => openModelDetailPage(model.id));
+        modelGrid.appendChild(card);
+        
+        // Add a slight delay and then fade in the card
+        setTimeout(() => {
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(20px)';
+          setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+          }, 50);
+        }, index * 100);
+      });
+    }
+
+    // Search models by name
+    function searchModels(searchTerm) {
+      currentSearchTerm = searchTerm.toLowerCase();
+      currentPage = 1; // Reset to first page when searching
+      
+      if (searchTerm === '') {
+        filteredModels = [...models];
+      } else {
+        filteredModels = models.filter(model => 
+          model.name.toLowerCase().includes(currentSearchTerm)
+        );
+      }
+      
+      // Clear grid and render filtered models
+      modelGrid.innerHTML = '';
+      
+      // Hide/show indicators based on search results
+      const loadingIndicator = document.getElementById('loading-indicator');
+      const endOfContent = document.getElementById('end-of-content');
+      loadingIndicator.style.display = 'none';
+      endOfContent.style.display = 'none';
+      
+      // Re-initialize infinite scroll for new results
+      setTimeout(() => {
+        initializeInfiniteScroll();
+      }, 100);
+      
+      renderModelCards();
+    }
+
+    // Open model detail page
+    function openModelDetailPage(modelId) {
+      const model = models.find(m => m.id === modelId);
+      if (!model) return;
+      
+      currentModelId = modelId;
+      slideshowImages = [...model.images];
+      shuffleArray(slideshowImages);
+      currentSlideIndex = 0;
+      
+      // Update model info
+      detailModelName.textContent = model.name;
+      
+      // Create slides
+      createSlides();
+      
+      // Show detail page
+      mainPage.style.display = 'none';
+      modelDetailPage.style.display = 'block';
+      
+      // Start slideshow
+      startSlideshow();
+    }
+
+    // Create slides
+    function createSlides() {
+      const loader = document.getElementById('slideshow-loader');
+      
+      // Show loader
+      loader.classList.remove('hidden');
+      
+      slideshowWrapper.innerHTML = '';
+      
+      let firstImageLoaded = false;
+      
+      // Function to hide loader when first image is fully loaded and visible
+      function hideLoaderWhenFirstImageReady() {
+        if (!firstImageLoaded) {
+          firstImageLoaded = true;
+          setTimeout(() => {
+            loader.classList.add('hidden');
+          }, 300); // Small delay for smooth transition
+        }
+      }
+      
+      slideshowImages.forEach((image, index) => {
+        const slide = document.createElement('div');
+        slide.className = `slide ${index === 0 ? 'active' : ''}`;
+        
+        // Create optimized image container for slideshow
+        const imageContainer = document.createElement('div');
+        imageContainer.className = 'relative w-full h-full flex items-center justify-center';
+        
+        const img = document.createElement('img');
+        img.className = 'lazy-image max-w-full max-h-full object-contain';
+        img.alt = 'Model Image';
+        img.style.cursor = 'pointer';
+        img.onclick = toggleFullscreen;
+        
+        // Add loading placeholder
+        const placeholder = document.createElement('div');
+        placeholder.className = 'image-placeholder';
+        placeholder.innerHTML = '<i class="fas fa-image"></i> Loading image...';
+        
+        const spinnerLoader = document.createElement('div');
+        spinnerLoader.className = 'image-loader';
+        
+        imageContainer.appendChild(placeholder);
+        imageContainer.appendChild(spinnerLoader);
+        imageContainer.appendChild(img);
+        
+        // Optimize image URL
+        const optimizedUrl = imageOptimizer.optimizeImageUrl(image, 1920, 85);
+        
+        // Optimize image URL
+        const slideshowOptimizedUrl = imageOptimizer.optimizeImageUrl(image, 1920, 85);
+        
+        // Load image with optimization
+        const imageLoader = new Image();
+        imageLoader.onload = () => {
+          img.src = slideshowOptimizedUrl;
+          img.classList.add('loaded');
+          placeholder.style.display = 'none';
+          spinnerLoader.style.display = 'none';
+          
+          // Hide main loader when first image loads
+          if (index === 0) {
+            hideLoaderWhenFirstImageReady();
+          }
+        };
+        
+        imageLoader.onerror = () => {
+          img.classList.add('error');
+          placeholder.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Failed to load';
+          placeholder.style.color = '#ff6b6b';
+          spinnerLoader.style.display = 'none';
+          
+          if (index === 0) {
+            hideLoaderWhenFirstImageReady();
+          }
+        };
+        
+        // Start loading
+        imageLoader.src = slideshowOptimizedUrl;
+        
+        slide.appendChild(imageContainer);
+        slideshowWrapper.appendChild(slide);
+      });
+      
+      // Fallback: hide loader after 8 seconds regardless
+      setTimeout(() => {
+        if (!firstImageLoaded) {
+          loader.classList.add('hidden');
+        }
+      }, 8000);
+    }
+
+    // Toggle fullscreen mode
+    function toggleFullscreen() {
+      const slideshowContainer = document.getElementById('model-detail-page');
+      
+      if (!isFullscreen) {
+        // Enter native browser fullscreen
+        isFullscreen = true;
+        
+        // Request fullscreen using the Fullscreen API
+        if (slideshowContainer.requestFullscreen) {
+          slideshowContainer.requestFullscreen();
+        } else if (slideshowContainer.webkitRequestFullscreen) {
+          slideshowContainer.webkitRequestFullscreen();
+        } else if (slideshowContainer.mozRequestFullScreen) {
+          slideshowContainer.mozRequestFullScreen();
+        } else if (slideshowContainer.msRequestFullscreen) {
+          slideshowContainer.msRequestFullscreen();
+        }
+        
+        slideshowContainer.classList.add('slideshow-fullscreen');
+        fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+        
+        // Add exit button
+        const exitBtn = document.createElement('div');
+        exitBtn.className = 'fullscreen-exit-btn';
+        exitBtn.innerHTML = '<i class="fas fa-times"></i>';
+        exitBtn.onclick = toggleFullscreen;
+        slideshowContainer.appendChild(exitBtn);
+        
+        // Hide controls temporarily for immersive experience
+        setTimeout(() => {
+          const controls = document.querySelector('.model-detail-controls');
+          const header = document.querySelector('.model-detail-header');
+          const modelInfo = document.querySelector('.model-info');
+          const exitButton = document.querySelector('.fullscreen-exit-btn');
+          const signature = document.querySelector('.slideshow-signature');
+          if (controls) controls.style.opacity = '0';
+          if (header) header.style.opacity = '0';
+          if (modelInfo) modelInfo.style.opacity = '0';
+          if (exitButton) exitButton.style.opacity = '0';
+          if (signature) signature.style.opacity = '0';
+        }, 2000);
+        
+        // Show controls on mouse move
+        document.addEventListener('mousemove', showControlsOnMove);
+        
+      } else {
+        // Exit fullscreen
+        exitFullscreen();
+      }
+    }
+
+    // Exit fullscreen mode
+    function exitFullscreen() {
+      const slideshowContainer = document.getElementById('model-detail-page');
+      
+      isFullscreen = false;
+      
+      // Exit native browser fullscreen
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+      
+      slideshowContainer.classList.remove('slideshow-fullscreen');
+      fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+      
+      // Remove exit button
+      const exitBtn = document.querySelector('.fullscreen-exit-btn');
+      if (exitBtn) exitBtn.remove();
+      
+      // Show controls
+      const controls = document.querySelector('.model-detail-controls');
+      const header = document.querySelector('.model-detail-header');
+      const modelInfo = document.querySelector('.model-info');
+      const exitButton = document.querySelector('.fullscreen-exit-btn');
+      const signature = document.querySelector('.slideshow-signature');
+      if (controls) controls.style.opacity = '1';
+      if (header) header.style.opacity = '1';
+      if (modelInfo) modelInfo.style.opacity = '1';
+      if (exitButton) exitButton.style.opacity = '1';
+      if (signature) signature.style.opacity = '0.8';
+      
+      // Remove mouse move listener
+      document.removeEventListener('mousemove', showControlsOnMove);
+    }
+
+    // Show controls on mouse movement in fullscreen
+    function showControlsOnMove() {
+      const controls = document.querySelector('.model-detail-controls');
+      const header = document.querySelector('.model-detail-header');
+      const modelInfo = document.querySelector('.model-info');
+      const exitButton = document.querySelector('.fullscreen-exit-btn');
+      const signature = document.querySelector('.slideshow-signature');
+      if (controls) controls.style.opacity = '1';
+      if (header) header.style.opacity = '1';
+      if (modelInfo) modelInfo.style.opacity = '1';
+      if (exitButton) exitButton.style.opacity = '1';
+      if (signature) signature.style.opacity = '0.8';
+      
+      // Hide again after 3 seconds of no movement
+      clearTimeout(window.hideControlsTimeout);
+      window.hideControlsTimeout = setTimeout(() => {
+        if (isFullscreen) {
+          if (controls) controls.style.opacity = '0';
+          if (header) header.style.opacity = '0';
+          if (modelInfo) modelInfo.style.opacity = '0';
+          if (exitButton) exitButton.style.opacity = '0';
+          if (signature) signature.style.opacity = '0';
+        }
+      }, 3000);
+    }
+
+    // Show specific slide
+    function showSlide(index) {
+      const slides = document.querySelectorAll('.slide');
+      
+      // Hide all slides
+      slides.forEach(slide => {
+        slide.classList.remove('active');
+      });
+      
+      // Show selected slide
+      slides[index].classList.add('active');
+      
+      // Reset progress
+      resetProgress();
+    }
+
+    // Navigate to the next slide
+    function nextSlide() {
+      currentSlideIndex = (currentSlideIndex + 1) % slideshowImages.length;
+      showSlide(currentSlideIndex);
+    }
+
+    // Navigate to the previous slide
+    function prevSlide() {
+      currentSlideIndex = (currentSlideIndex - 1 + slideshowImages.length) % slideshowImages.length;
+      showSlide(currentSlideIndex);
+    }
+
+    // Start slideshow
+    function startSlideshow() {
+      stopSlideshow();
+      isPlaying = true;
+      playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+      slideshowInterval = setInterval(nextSlide, slideDuration);
+      startProgress();
+    }
+
+    // Stop slideshow
+    function stopSlideshow() {
+      if (slideshowInterval) {
+        clearInterval(slideshowInterval);
+        slideshowInterval = null;
+      }
+      stopProgress();
+    }
+
+    // Toggle play/pause
+    function togglePlayPause() {
+      if (isPlaying) {
+        stopSlideshow();
+        isPlaying = false;
+        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+      } else {
+        startSlideshow();
+      }
+    }
+
+    // Start progress bar
+    function startProgress() {
+      stopProgress();
+      progressValue = 0;
+      progressBar.style.width = '0%';
+      
+      progressInterval = setInterval(() => {
+        progressValue += 0.1;
+        progressBar.style.width = `${(progressValue / slideDuration) * 100 * 1000}%`;
+      }, 10);
+    }
+
+    // Stop progress bar
+    function stopProgress() {
+      if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+      }
+    }
+
+    // Reset progress bar
+    function resetProgress() {
+      stopProgress();
+      progressValue = 0;
+      progressBar.style.width = '0%';
+      
+      if (isPlaying) {
+        startProgress();
+      }
+    }
+
+    // Close model detail page
+    function closeModelDetailPage() {
+      // Exit fullscreen if active
+      if (isFullscreen) {
+        exitFullscreen();
+      }
+      
+      // Hide loader
+      const loader = document.getElementById('slideshow-loader');
+      loader.classList.add('hidden');
+      
+      stopSlideshow();
+      mainPage.style.display = 'flex';
+      modelDetailPage.style.display = 'none';
+      currentModelId = null;
+    }
+
+    // Shuffle array (Fisher-Yates algorithm)
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    // Mobile menu toggle
+    const mobileMenuButton = document.querySelector('.mobile-menu button');
+    mobileMenuButton.addEventListener('click', () => {
+      // In a real implementation, you would toggle a mobile menu here
+      alert('Mobile menu would open here');
+    });
+
+    // Event listeners
+    backButton.addEventListener('click', closeModelDetailPage);
+    prevSlideBtn.addEventListener('click', () => {
+      prevSlide();
+      if (isPlaying) {
+        stopSlideshow();
+        startSlideshow();
+      }
+    });
+    nextSlideBtn.addEventListener('click', () => {
+      nextSlide();
+      if (isPlaying) {
+        stopSlideshow();
+        startSlideshow();
+      }
+    });
+    playPauseBtn.addEventListener('click', togglePlayPause);
+    fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+    // Listen for fullscreen changes (when user exits via browser controls)
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+    function handleFullscreenChange() {
+      const isCurrentlyFullscreen = !!(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement
+      );
+      
+      if (!isCurrentlyFullscreen && isFullscreen) {
+        // User exited fullscreen via browser controls (like pressing Escape)
+        isFullscreen = false;
+        const slideshowContainer = document.getElementById('model-detail-page');
+        slideshowContainer.classList.remove('slideshow-fullscreen');
+        fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+        
+        // Remove exit button
+        const exitBtn = document.querySelector('.fullscreen-exit-btn');
+        if (exitBtn) exitBtn.remove();
+        
+        // Show controls
+        const controls = document.querySelector('.model-detail-controls');
+        const header = document.querySelector('.model-detail-header');
+        const modelInfo = document.querySelector('.model-info');
+        const signature = document.querySelector('.slideshow-signature');
+        if (controls) controls.style.opacity = '1';
+        if (header) header.style.opacity = '1';
+        if (modelInfo) modelInfo.style.opacity = '1';
+        if (signature) signature.style.opacity = '0.8';
+        
+        // Remove mouse move listener
+        document.removeEventListener('mousemove', showControlsOnMove);
+      }
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (modelDetailPage.style.display !== 'block') return;
+      
+      if (e.key === 'Escape') {
+        if (isFullscreen) {
+          toggleFullscreen();
+        } else {
+          closeModelDetailPage();
+        }
+      } else if (e.key === 'ArrowLeft') {
+        prevSlide();
+        if (isPlaying) {
+          stopSlideshow();
+          startSlideshow();
+        }
+      } else if (e.key === 'ArrowRight') {
+        nextSlide();
+        if (isPlaying) {
+          stopSlideshow();
+          startSlideshow();
+        }
+      } else if (e.key === ' ') {
+        e.preventDefault(); // Prevent page scroll
+        togglePlayPause();
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      }
+    });
+
+    // Search input functionality
+    const searchInput = document.getElementById('search-input');
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', (e) => {
+      const searchTerm = e.target.value.trim();
+      
+      // Debounce search to avoid too many calls while typing
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        searchModels(searchTerm);
+      }, 300); // Wait 300ms after user stops typing
+    });
+
+    // Initialize the app
+    async function initializeApp() {
+      await initializeModels();
+      initializeEffects(); // Initialize parallax and mouse effects
+      renderModelCards();
+    }
+    
+    // Page navigation functions
+    function showMainPage() {
+      document.getElementById('main-page').style.display = 'flex';
+      document.getElementById('about-page').style.display = 'none';
+      document.getElementById('contact-page').style.display = 'none';
+      document.getElementById('model-detail-page').style.display = 'none';
+    }
+    
+    function showAboutPage() {
+      document.getElementById('main-page').style.display = 'none';
+      document.getElementById('about-page').style.display = 'flex';
+      document.getElementById('contact-page').style.display = 'none';
+      document.getElementById('model-detail-page').style.display = 'none';
+    }
+    
+    function showContactPage() {
+      document.getElementById('main-page').style.display = 'none';
+      document.getElementById('about-page').style.display = 'none';
+      document.getElementById('contact-page').style.display = 'flex';
+      document.getElementById('model-detail-page').style.display = 'none';
+    }
+    
+    initializeApp();
+  </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96958034037d3d3f',t:'MTc1NDIyMDgxMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
